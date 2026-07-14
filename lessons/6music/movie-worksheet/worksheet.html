@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>영화 클립 감상 워크시트</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    min-height: 100vh;
+    padding: 64px 24px;
+    display: flex;
+    justify-content: center;
+    position: relative;
+    overflow-x: hidden;
+    background: radial-gradient(ellipse 1000px 600px at 50% 20%, #4a3572 0%, #2a1d45 55%, #150c26 100%);
+  }
+
+  /* 좌우 커튼 */
+  .curtain {
+    position: fixed;
+    top: 0;
+    height: 100%;
+    width: 120px;
+    z-index: 1;
+    background: repeating-linear-gradient(90deg, #4a1626 0 8px, #8a2b4a 22px, #641f37 38px, #4a1626 46px);
+  }
+  .curtain.left { left: 0; box-shadow: inset -34px 0 55px rgba(0,0,0,.65); }
+  .curtain.right { right: 0; box-shadow: inset 34px 0 55px rgba(0,0,0,.65); }
+
+  /* 상단 필름스트립 */
+  .filmstrip {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 120px;
+    z-index: 4;
+    background: repeating-linear-gradient(90deg, #4a1626 0 16px, #8a2b4a 40px, #641f37 64px, #4a1626 80px);
+    box-shadow: inset 0 -32px 50px rgba(0,0,0,.6);
+    clip-path: polygon(0 0,100% 0,100% 45%,96.66% 100%,93.33% 45%,90% 100%,86.66% 45%,83.33% 100%,80% 45%,76.66% 100%,73.33% 45%,70% 100%,66.66% 45%,63.33% 100%,60% 45%,56.66% 100%,53.33% 45%,50% 100%,46.66% 45%,43.33% 100%,40% 45%,36.66% 100%,33.33% 45%,30% 100%,26.66% 45%,23.33% 100%,20% 45%,16.66% 100%,13.33% 45%,10% 100%,6.66% 45%,3.33% 100%,0 45%);
+  }
+  .filmstrip-glow {
+    position: fixed;
+    top: 112px;
+    left: 0;
+    width: 100%;
+    height: 14px;
+    z-index: 4;
+    background: linear-gradient(180deg, rgba(212,169,76,.9), rgba(212,169,76,0));
+  }
+
+  #sheet {
+    max-width: 760px;
+    width: 100%;
+    background: #fbf7ec;
+    border-radius: 22px;
+    padding: 32px 26px 44px;
+    box-shadow: 0 40px 90px rgba(0,0,0,.55), 0 0 0 1px rgba(212,169,76,.25);
+    position: relative;
+    z-index: 2;
+    margin-top: 70px;
+  }
+
+  header { text-align: center; margin-bottom: 26px; }
+  .eyebrow { font-size: 12px; letter-spacing: 4px; font-weight: 700; color: #b8752e; margin-bottom: 8px; }
+  h1 { font-family: 'Black Han Sans', sans-serif; font-size: 28px; color: #3d2a5e; margin: 0; letter-spacing: .5px; }
+  .subtitle { font-size: 14px; color: #8a7f6a; margin-top: 8px; }
+  .divider { width: 220px; height: 7px; margin: 18px auto; border-radius: 4px; background: repeating-linear-gradient(45deg,#2b1a3d 0 9px,#d4a94c 9px 18px); }
+
+  .id-row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .id-row label { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; color: #3d2a5e; }
+  .id-row input {
+    padding: 7px 8px; border: 2px solid #d9c9a0; border-radius: 8px; font-size: 14px; text-align: center;
+    background: #fff; font-family: inherit;
+  }
+  #cls, #num { width: 60px; }
+  #name { width: 110px; }
+
+  .step { margin-bottom: 22px; border-radius: 16px; overflow: hidden; background: #fff; border: 2px solid var(--accent-light); }
+  .step-head {
+    background: var(--accent); color: #fff; padding: 12px 18px;
+    display: flex; justify-content: space-between; align-items: center; gap: 10px;
+  }
+  .step-head-left { display: flex; align-items: center; gap: 10px; }
+  .badge {
+    width: 26px; height: 26px; border-radius: 50%; background: #fff; color: var(--accent);
+    display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; flex-shrink: 0;
+  }
+  .step-title { font-weight: 700; font-size: 16px; }
+  .clip-label { font-size: 12px; background: rgba(255,255,255,.22); padding: 4px 10px; border-radius: 999px; white-space: nowrap; }
+  .step-body { padding: 18px 18px 6px; }
+  .hint { font-size: 13px; color: #7a6a3a; background: #f7f0dd; border-left: 4px solid var(--accent); border-radius: 8px; padding: 10px 14px; margin-bottom: 14px; }
+
+  .question { margin-bottom: 20px; }
+  .q-text { font-weight: 700; margin-bottom: 9px; font-size: 15px; color: #2d2a26; }
+
+  .choices { display: grid; gap: 7px; }
+  .choice {
+    display: flex; align-items: flex-start; gap: 8px; padding: 10px 14px;
+    border: 2px solid #e2dccb; border-radius: 10px; cursor: pointer; background: #fff; font-size: 15px;
+  }
+  .choice input { margin-top: 3px; }
+  .choice.selected { border-color: #443272; background: #f0edfa; }
+  .choice.correct { border-color: #3a9e5f; }
+  .choice.correct.selected { background: #e8f6ec; }
+  .choice.wrong.selected { border-color: #c0473f; background: #fbeae9; }
+
+  textarea {
+    width: 100%; min-height: 56px; padding: 10px 12px; border: 2px solid #d9c9a0; border-radius: 10px;
+    font-size: 15px; font-family: inherit; resize: vertical; box-sizing: border-box; background: #fff;
+  }
+  textarea.essay { min-height: 140px; }
+  .char-count { text-align: right; font-size: 12px; color: #a89e88; margin-top: 2px; }
+
+  .actions { display: flex; gap: 12px; justify-content: center; margin-top: 22px; flex-wrap: wrap; }
+  button {
+    padding: 13px 26px; border: none; border-radius: 999px; font-size: 15px; font-weight: 800;
+    cursor: pointer; font-family: inherit;
+  }
+  #gradeBtn { background: linear-gradient(135deg,#e8c377,#c8973f); color: #3d2a5e; box-shadow: 0 6px 16px rgba(200,151,63,.4); }
+  #saveBtn { background: #5e2a44; color: #fdf3e7; box-shadow: 0 6px 16px rgba(94,42,68,.35); }
+
+  #resultMsg { text-align: center; margin-top: 16px; font-size: 15px; font-weight: 800; color: #443272; min-height: 20px; }
+  .footnote { text-align: center; font-size: 12px; color: #b0a894; margin-top: 10px; }
+</style>
+</head>
+<body>
+
+<div class="curtain left"></div>
+<div class="curtain right"></div>
+<div class="filmstrip"></div>
+<div class="filmstrip-glow"></div>
+
+<div id="sheet">
+
+  <header>
+    <div class="eyebrow">FILM × CLASSIC MUSIC</div>
+    <h1>🎬 음악 속으로! 영화 클립 감상 워크시트</h1>
+    <p class="subtitle">6학년 음악 · 학기말 마무리 | 클래식이 생활 속 음악이 되기까지</p>
+    <div class="divider"></div>
+    <div class="id-row">
+      <label>반 <input id="cls" type="number" min="1" max="15"></label>
+      <label>번호 <input id="num" type="number" min="1" max="40"></label>
+      <label>이름 <input id="name" type="text"></label>
+    </div>
+  </header>
+
+  <div class="step" style="--accent:#443272; --accent-light:#d9d3ef;">
+    <div class="step-head">
+      <div class="step-head-left"><span class="badge">1</span><span class="step-title">STEP 1. 홀스트 "행성" 중 '목성'</span></div>
+      <span class="clip-label">🎧 클립 ①</span>
+    </div>
+    <div class="step-body">
+      <div class="hint">오케스트라 실황을 보며 주제 가락이 나오는 순간에 귀를 기울여 보세요.</div>
+
+      <div class="question">
+        <div class="q-text">1. 모음곡 "행성"을 작곡한 사람과 그 나라를 바르게 짝지은 것은?</div>
+        <div class="choices" data-name="q1" data-correct="1">
+          <label class="choice"><input type="radio" name="q1" value="0"><span>베토벤 - 독일</span></label>
+          <label class="choice"><input type="radio" name="q1" value="1"><span>홀스트 - 영국</span></label>
+          <label class="choice"><input type="radio" name="q1" value="2"><span>모차르트 - 오스트리아</span></label>
+          <label class="choice"><input type="radio" name="q1" value="3"><span>비발디 - 이탈리아</span></label>
+        </div>
+      </div>
+
+      <div class="question">
+        <div class="q-text">2. '목성'의 부제로 알맞은 것은?</div>
+        <div class="choices" data-name="q2" data-correct="2">
+          <label class="choice"><input type="radio" name="q2" value="0"><span>전쟁을 가져오는 자</span></label>
+          <label class="choice"><input type="radio" name="q2" value="1"><span>신비를 가져오는 자</span></label>
+          <label class="choice"><input type="radio" name="q2" value="2"><span>즐거움을 가져오는 자</span></label>
+          <label class="choice"><input type="radio" name="q2" value="3"><span>늙음을 가져오는 자</span></label>
+        </div>
+      </div>
+
+      <div class="question">
+        <div class="q-text">3. 중간에 나오는 아름다운 주제 가락 부분에서, 앞부분과 달라진 점을 음악 요소(빠르기·셈여림·가락)로 써 보세요.</div>
+        <textarea id="t1" placeholder="예) 빠르기가 ~해지고, 셈여림은 ~, 가락은 ~한 느낌으로 바뀌었다."></textarea>
+        <div class="char-count" id="t1-count">0자</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="step" style="--accent:#b8752e; --accent-light:#f0dcc0;">
+    <div class="step-head">
+      <div class="step-head-left"><span class="badge">2</span><span class="step-title">STEP 2. 시스터 액트 2 - 'Oh Happy Day'</span></div>
+      <span class="clip-label">🎧 클립 ②</span>
+    </div>
+    <div class="step-body">
+      <div class="hint">부끄러워하던 학생의 솔로가 합창으로 바뀌는 순간을 잘 관찰하세요.</div>
+
+      <div class="question">
+        <div class="q-text">4. 솔로(혼자 부르기)에서 합창으로 바뀔 때 소리는 어떻게 달라졌나요?</div>
+        <div class="choices" data-name="q4" data-correct="2">
+          <label class="choice"><input type="radio" name="q4" value="0"><span>소리가 작고 조용해졌다</span></label>
+          <label class="choice"><input type="radio" name="q4" value="1"><span>가락이 사라지고 말소리만 남았다</span></label>
+          <label class="choice"><input type="radio" name="q4" value="2"><span>소리가 풍성해지고 성부가 어울려 웅장해졌다</span></label>
+          <label class="choice"><input type="radio" name="q4" value="3"><span>아무 변화가 없었다</span></label>
+        </div>
+      </div>
+
+      <div class="question">
+        <div class="q-text">5. 클립 속 지휘자(선생님)가 한 일로 알맞은 것은?</div>
+        <div class="choices" data-name="q5" data-correct="0">
+          <label class="choice"><input type="radio" name="q5" value="0"><span>손짓으로 시작·빠르기·셈여림을 알려 주며 합창을 이끌었다</span></label>
+          <label class="choice"><input type="radio" name="q5" value="1"><span>노래를 혼자 다 불렀다</span></label>
+          <label class="choice"><input type="radio" name="q5" value="2"><span>악보를 나눠 주기만 했다</span></label>
+          <label class="choice"><input type="radio" name="q5" value="3"><span>무대 뒤에서 구경만 했다</span></label>
+        </div>
+      </div>
+
+      <div class="question">
+        <div class="q-text">6. 노래가 진행되며 셈여림이 어떻게 변했고, 그 변화가 어떤 느낌을 주었는지 써 보세요.</div>
+        <textarea id="t2" placeholder="예) 처음에는 여리게(p) 시작했는데 점점 세지면서(cresc.) ~한 느낌이 들었다."></textarea>
+        <div class="char-count" id="t2-count">0자</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="step" style="--accent:#2f6b52; --accent-light:#cfe6da;">
+    <div class="step-head">
+      <div class="step-head-left"><span class="badge">3</span><span class="step-title">STEP 3. 시스터 액트 2 - 'Joyful, Joyful'</span></div>
+      <span class="clip-label">🎧 클립 ③</span>
+    </div>
+    <div class="step-body">
+      <div class="hint">이 곡의 원곡은 베토벤 교향곡 9번 '환희의 송가'예요. 성부가 몇 개로 나뉘어 어울리는지 세어 보세요.</div>
+
+      <div class="question">
+        <div class="q-text">7. 'Joyful, Joyful'처럼 곡의 일부에서 성부가 나뉘어 함께 부르는 것을 무엇이라고 하나요?</div>
+        <div class="choices" data-name="q7" data-correct="1">
+          <label class="choice"><input type="radio" name="q7" value="0"><span>돌림노래</span></label>
+          <label class="choice"><input type="radio" name="q7" value="1"><span>부분 2부 합창</span></label>
+          <label class="choice"><input type="radio" name="q7" value="2"><span>독창</span></label>
+          <label class="choice"><input type="radio" name="q7" value="3"><span>파트너 노래</span></label>
+        </div>
+      </div>
+
+      <div class="question">
+        <div class="q-text">8. 이 곡의 원곡 가락을 만든 작곡가는 누구인가요?</div>
+        <div class="choices" data-name="q8" data-correct="3">
+          <label class="choice"><input type="radio" name="q8" value="0"><span>홀스트</span></label>
+          <label class="choice"><input type="radio" name="q8" value="1"><span>모차르트</span></label>
+          <label class="choice"><input type="radio" name="q8" value="2"><span>쇼팽</span></label>
+          <label class="choice"><input type="radio" name="q8" value="3"><span>베토벤</span></label>
+        </div>
+      </div>
+
+      <div class="question">
+        <div class="q-text">9. 성부가 어울리는 부분에서 가장 인상 깊었던 순간과 그 이유를 써 보세요. (랩이 들어간 부분도 좋아요!)</div>
+        <textarea id="t3" placeholder="예) ~하는 부분에서 두 성부가 겹쳐질 때 ~해서 인상 깊었다."></textarea>
+        <div class="char-count" id="t3-count">0자</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="step" style="--accent:#7a3556; --accent-light:#ecd7e0;">
+    <div class="step-head">
+      <div class="step-head-left"><span class="badge">4</span><span class="step-title">STEP 4. 생각 잇기 - 클래식, 생활 속 음악이 되다</span></div>
+      <span class="clip-label">✍️ 서술형</span>
+    </div>
+    <div class="step-body">
+      <div class="hint">'목성'의 주제 가락은 여러 노래와 행사 음악으로, 베토벤의 '환희의 송가'는 영화 속 'Joyful, Joyful'로 다시 태어났어요.</div>
+
+      <div class="question">
+        <div class="q-text">10. 오늘 감상한 클립들을 바탕으로, 옛날에 만들어진 클래식 음악이 오늘날 우리 생활 속(영화, 행사, 노래 등)에서 어떤 역할을 하고 있는지 4문장 이상 써 보세요. 음악이 장면의 분위기나 사람들의 감정에 준 효과를 꼭 넣어 주세요.</div>
+        <textarea class="essay" id="t4" placeholder="자유롭게 나의 생각을 써 보세요."></textarea>
+        <div class="char-count" id="t4-count">0자</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button id="gradeBtn">✅ 채점하기</button>
+    <button id="saveBtn">📷 이미지로 저장</button>
+  </div>
+  <div id="resultMsg"></div>
+  <div class="footnote">작성 내용은 이 기기에 자동 저장됩니다.</div>
+
+</div>
+
+<script>
+  const STORE_KEY = 'music6_sisteract_ws';
+  const MC_NAMES = ['q1','q2','q4','q5','q7','q8'];
+  const TEXT_IDS = ['t1','t2','t3','t4'];
+  let graded = false;
+
+  function save() {
+    const data = {};
+    MC_NAMES.forEach(name => {
+      const checked = document.querySelector(`input[name="${name}"]:checked`);
+      data[name] = checked ? checked.value : '';
+    });
+    TEXT_IDS.forEach(id => { data[id] = document.getElementById(id).value; });
+    ['cls', 'num', 'name'].forEach(id => { data[id] = document.getElementById(id).value; });
+    localStorage.setItem(STORE_KEY, JSON.stringify(data));
+  }
+
+  function load() {
+    let data;
+    try { data = JSON.parse(localStorage.getItem(STORE_KEY) || '{}'); } catch (e) { data = {}; }
+    MC_NAMES.forEach(name => {
+      if (data[name]) {
+        const input = document.querySelector(`input[name="${name}"][value="${data[name]}"]`);
+        if (input) input.checked = true;
+      }
+      updateChoiceStyles(name);
+    });
+    TEXT_IDS.forEach(id => {
+      if (data[id]) {
+        document.getElementById(id).value = data[id];
+        updateCount(id);
+      }
+    });
+    ['cls', 'num', 'name'].forEach(id => {
+      if (data[id]) document.getElementById(id).value = data[id];
+    });
+  }
+
+  function updateCount(id) {
+    document.getElementById(id + '-count').textContent = document.getElementById(id).value.length + '자';
+  }
+
+  function updateChoiceStyles(name) {
+    const group = document.querySelector(`.choices[data-name="${name}"]`);
+    const correct = group.dataset.correct;
+    const checked = document.querySelector(`input[name="${name}"]:checked`);
+    const checkedValue = checked ? checked.value : null;
+
+    group.querySelectorAll('.choice').forEach(choice => {
+      const value = choice.querySelector('input').value;
+      choice.classList.remove('selected', 'correct', 'wrong');
+      const isSelected = value === checkedValue;
+      if (graded) {
+        if (value === correct) choice.classList.add('correct');
+        if (isSelected && value !== correct) choice.classList.add('wrong');
+        if (isSelected) choice.classList.add('selected');
+      } else if (isSelected) {
+        choice.classList.add('selected');
+      }
+    });
+  }
+
+  MC_NAMES.forEach(name => {
+    document.querySelectorAll(`input[name="${name}"]`).forEach(input => {
+      input.addEventListener('change', () => { updateChoiceStyles(name); save(); });
+    });
+  });
+
+  TEXT_IDS.forEach(id => {
+    document.getElementById(id).addEventListener('input', () => { updateCount(id); save(); });
+  });
+
+  ['cls', 'num', 'name'].forEach(id => {
+    document.getElementById(id).addEventListener('change', save);
+  });
+
+  function grade() {
+    graded = true;
+    const ANSWERS = { q1: '1', q2: '2', q4: '2', q5: '0', q7: '1', q8: '3' };
+    let score = 0;
+    const total = MC_NAMES.length;
+    MC_NAMES.forEach(name => {
+      const checked = document.querySelector(`input[name="${name}"]:checked`);
+      if (checked && checked.value === ANSWERS[name]) score++;
+      updateChoiceStyles(name);
+    });
+
+    let msg = `객관식 ${score} / ${total} 문제 정답!`;
+    const shortTexts = ['t1', 't2', 't3'].filter(id => document.getElementById(id).value.trim().length < 15);
+    const essay = document.getElementById('t4').value.trim();
+    if (shortTexts.length > 0) msg += ' | 짧은 서술 답을 조금 더 자세히 써 볼까요?';
+    if (essay.length < 80) msg += ' | 마지막 서술형은 4문장 이상으로 채워 주세요.';
+    if (score === total && shortTexts.length === 0 && essay.length >= 80) {
+      msg = `🎉 완벽해요! 객관식 ${score}/${total} + 서술형 완성! 이미지로 저장해 제출하세요.`;
+    }
+    document.getElementById('resultMsg').textContent = msg;
+  }
+
+  async function saveImage() {
+    const cls = document.getElementById('cls').value;
+    const num = document.getElementById('num').value;
+    if (!cls || !num) { alert('반과 번호를 먼저 입력해 주세요!'); return; }
+    const el = document.getElementById('sheet');
+    const canvas = await html2canvas(el, { backgroundColor: '#fbf7ec', scale: 2 });
+    const a = document.createElement('a');
+    a.download = `음악워크시트_${cls}반${num}번.png`;
+    a.href = canvas.toDataURL('image/png');
+    a.click();
+  }
+
+  document.getElementById('gradeBtn').addEventListener('click', grade);
+  document.getElementById('saveBtn').addEventListener('click', saveImage);
+
+  load();
+</script>
+
+</body>
+</html>
