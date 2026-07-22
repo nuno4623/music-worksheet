@@ -382,16 +382,25 @@
     document.getElementById('resultMsg').textContent = msg;
   }
 
-  async function saveImage() {
+  function saveImage() {
     const cls = document.getElementById('cls').value;
     const num = document.getElementById('num').value;
     if (!cls || !num) { alert('반과 번호를 먼저 입력해 주세요!'); return; }
     const el = document.getElementById('sheet');
-    const canvas = await html2canvas(el, { backgroundColor: '#fbf7ec', scale: 2 });
-    const a = document.createElement('a');
-    a.download = `음악워크시트_${cls}반${num}번.png`;
-    a.href = canvas.toDataURL('image/png');
-    a.click();
+    const textareas = [...el.querySelectorAll('textarea')];
+    const restore = textareas.map(t => ({ el: t, height: t.style.height, overflow: t.style.overflow }));
+    textareas.forEach(t => { t.style.overflow = 'hidden'; t.style.height = t.scrollHeight + 'px'; });
+    requestAnimationFrame(() => {
+      html2canvas(el, { backgroundColor: '#fbf7ec', scale: 2 }).then(canvas => {
+        restore.forEach(r => { r.el.style.height = r.height; r.el.style.overflow = r.overflow; });
+        const a = document.createElement('a');
+        a.download = `음악워크시트_${cls}반${num}번.png`;
+        a.href = canvas.toDataURL('image/png');
+        a.click();
+      }).catch(() => {
+        restore.forEach(r => { r.el.style.height = r.height; r.el.style.overflow = r.overflow; });
+      });
+    });
   }
 
   document.getElementById('gradeBtn').addEventListener('click', grade);
