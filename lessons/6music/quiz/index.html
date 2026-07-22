@@ -135,6 +135,7 @@
 
   .tile.special { background:linear-gradient(135deg,#3a2f63,#241b45); }
   .tile.start { background:linear-gradient(135deg,#ffd76b,#ff9a5b); color:#3a2450; }
+  .tile.chance { background:linear-gradient(135deg,#c355d6,#f5c945); color:#2a1436; }
 
   .tokens { position:absolute; top:2px; right:2px; display:flex; flex-wrap:wrap; gap:1px; justify-content:flex-end; max-width:70%; }
   .token { width:15px; height:15px; border-radius:50%; display:grid; place-items:center; font-size:10px; border:2px solid #fff; box-shadow:0 1px 3px rgba(0,0,0,.5); }
@@ -261,11 +262,11 @@
     </div>
 
     <div class="field">
-      <label>③ 몇 개의 별⭐을 먼저 모으면 이길까요?</label>
+      <label>③ 몇 문제를 풀까요? <span style="font-weight:400;color:#a99fce;font-size:13px">(문제가 겹치지 않게 골고루 나와요 · 별 최다 모둠 우승)</span></label>
       <div class="chips" id="goal">
-        <button class="chip" data-g="6">별 6개 (짧게)</button>
-        <button class="chip on" data-g="10">별 10개 (보통)</button>
-        <button class="chip" data-g="15">별 15개 (길게)</button>
+        <button class="chip" data-g="24">24문제 (짧게)</button>
+        <button class="chip" data-g="48">48문제 (보통)</button>
+        <button class="chip on" data-g="72">72문제 전체 완주 🏁</button>
       </div>
     </div>
 
@@ -291,7 +292,7 @@
     </div>
     <footer>
       각 칸에 도착하면 그 단원의 문제가 나와요. 정답을 맞히면 별⭐ 획득!<br>
-      🔑 황금열쇠 = 보너스 문제(별 2개) · 🎼 지휘자 무대 = 한 번 더 · 🏝️ 쉼표 섬 = 한 번 쉬기 · 🚩 출발 통과 = 별 1개
+      🔑 황금열쇠 = 보너스 문제(별 2개) · 🎲 찬스 = 랜덤 사건(별 +/− 변동!) · 🎼 지휘자 무대 = 한 번 더 · 🏝️ 쉼표 섬 = 한 번 쉬기 · 🚩 출발 통과 = 별 1개
     </footer>
   </div>
 </div>
@@ -304,6 +305,16 @@
     <div class="choices" id="qChoices"></div>
     <div class="explain" id="qExplain"></div>
     <button class="nextbtn" id="qNext">확인하고 계속 ▶</button>
+  </div>
+</div>
+
+<!-- 찬스 이벤트 모달 -->
+<div class="overlay" id="eventOverlay">
+  <div class="modal" style="text-align:center">
+    <span class="badge" style="background:linear-gradient(135deg,#c355d6,#f5c945);color:#2a1436">🎲 찬스 카드!</span>
+    <div id="evEmoji" style="font-size:60px;line-height:1.1;margin:6px 0"></div>
+    <div id="evText" class="q" style="text-align:center"></div>
+    <button class="nextbtn show" id="evNext" style="display:block">확인 ▶</button>
   </div>
 </div>
 
@@ -430,10 +441,12 @@ const SPECIAL = {
   12: { type:"again",  ic:"🎼", lb:"지휘자무대" },
   18: { type:"island", ic:"🏝️", lb:"쉼표 섬" }
 };
+const CHANCE_POS = new Set([3, 9, 15, 21]); // 각 변 중앙에 찬스 칸
 function buildTiles(){
   const tiles=[]; let catCursor=0;
   for(let i=0;i<24;i++){
     if(SPECIAL[i]){ tiles.push({idx:i, ...SPECIAL[i], special:true}); }
+    else if(CHANCE_POS.has(i)){ tiles.push({idx:i, type:"chance", ic:"🎲", lb:"찬스", special:true}); }
     else {
       const u = UNITS[catCursor % UNITS.length]; catCursor++;
       tiles.push({idx:i, type:"cat", unit:u, ic:u.ic, lb:u.short, color:u.color, special:false});
@@ -453,7 +466,7 @@ let state = null;
 let TILES = buildTiles();
 
 // ====== 설정 화면 ======
-let selTeams = 2, selGoal = 10;
+let selTeams = 2, selGoal = 72;
 const teamCountEl = document.getElementById('teamCount');
 const teamNamesEl = document.getElementById('teamNames');
 const goalEl = document.getElementById('goal');
@@ -492,7 +505,11 @@ document.getElementById('startBtn').addEventListener('click', ()=>{
     ic: TEAM_STYLE[i].ic, bg: TEAM_STYLE[i].bg,
     stars:0, pos:0, skip:false
   }));
-  state = { players, cur:0, goal:selGoal, rolling:false, questionOpen:false, lastQ:{} };
+  // 단원별 문제 덱을 섞어 준비 (뽑을 때마다 소진 → 겹치지 않게 출제)
+  const totalAvailable = UNITS.reduce((s,u)=>s+u.questions.length,0); // 72
+  UNITS.forEach(u=>{ u._deck = shuffle(u.questions.map((q,i)=>i)); });
+  const target = Math.min(selGoal, totalAvailable);
+  state = { players, cur:0, target, asked:0, totalAvailable, rolling:false, questionOpen:false };
   document.getElementById('setup').style.display='none';
   document.getElementById('gameView').classList.add('show');
   renderBoard();
@@ -509,7 +526,7 @@ function renderBoard(){
     const {r,c}=gridPos(t.idx);
     el.style.gridRow=r; el.style.gridColumn=c;
     el.dataset.idx=t.idx;
-    el.className='tile '+(t.type==='cat'?'cat':'special')+(t.type==='start'?' start':'');
+    el.className='tile '+(t.type==='cat'?'cat':'special')+(t.type==='start'?' start':'')+(t.type==='chance'?' chance':'');
     if(t.type==='cat') el.style.background=t.color;
     el.innerHTML=`<span class="ic">${t.ic}</span><span class="lb">${t.lb}</span><span class="tokens"></span>`;
     board.appendChild(el);
@@ -540,7 +557,7 @@ function updatePanel(){
   const p=state.players[state.cur];
   document.getElementById('whoTurn').innerHTML=`${p.ic} ${p.name} 차례`;
   document.getElementById('turnHint').textContent = p.skip ? '이번엔 쉼표 섬에서 한 번 쉬어요!' : '주사위를 굴려 보세요';
-  document.getElementById('miniInfo').textContent = `목표: 별 ${state.goal}개 먼저 모으기`;
+  document.getElementById('miniInfo').textContent = `🎯 푼 문제 ${state.asked} / ${state.target}  ·  별 최다 모둠 우승`;
   // 점수판
   const sb=document.getElementById('scoreboard');
   sb.innerHTML=state.players.map((pl,i)=>
@@ -598,27 +615,72 @@ function highlight(idx){
 function landOn(p){
   const t=TILES[p.pos];
   if(t.type==='cat'){ openQuestion(t.unit, 1); }
-  else if(t.type==='key'){ const u=UNITS[Math.floor(Math.random()*UNITS.length)]; flash('🔑 황금열쇠! 보너스 문제 (별 2개)'); setTimeout(()=>openQuestion(u,2,true),700); }
+  else if(t.type==='key'){ flash('🔑 황금열쇠! 보너스 문제 (별 2개)'); setTimeout(()=>openQuestion(null,2,true),700); }
+  else if(t.type==='chance'){ flash('🎲 찬스 칸! 무슨 일이 일어날까?'); setTimeout(()=>doChance(p),650); }
   else if(t.type==='again'){ flash('🎼 지휘자 무대! 한 번 더 굴려요'); endTurn(true); }
   else if(t.type==='island'){ p.skip=true; flash('🏝️ 쉼표 섬! 다음 차례는 쉬어요'); endTurn(false); }
   else if(t.type==='start'){ p.stars++; flash('🚩 출발 도착! 별 +1'); endTurn(false); }
 }
 
+// ====== 찬스 카드 (랜덤 이벤트: 패널티 · 보너스 · 점수 변동) ======
+function rollChance(p){
+  const others = state.players.filter(x=>x!==p);
+  const pool = [];
+  const add=(w,fn)=>{ for(let k=0;k<w;k++) pool.push(fn); };
+  add(3, ()=>{ p.stars=Math.max(0,p.stars-1); return {emoji:'➖', text:'삐끗! 별 1개를 잃었어요', cls:'bad'}; });
+  add(2, ()=>{ p.stars=Math.max(0,p.stars-2); return {emoji:'💥', text:'아이코! 별 2개를 잃었어요', cls:'bad'}; });
+  add(3, ()=>{ p.stars+=2; return {emoji:'✨', text:'보너스! 별 2개를 얻었어요', cls:'good'}; });
+  add(3, ()=>{ const d=Math.floor(Math.random()*6)-2; p.stars=Math.max(0,p.stars+d);
+    return {emoji:'🎰', text:`행운의 룰렛! 별 ${d>=0?'+':''}${d}`, cls:d>=0?'good':'bad'}; });
+  add(2, ()=>{ const c=others.filter(o=>o.stars>0);
+    if(!c.length){ p.stars+=1; return {emoji:'🎁', text:'뺏을 별이 없어 별 1개를 받았어요', cls:'good'}; }
+    const o=c[Math.floor(Math.random()*c.length)]; o.stars--; p.stars++;
+    return {emoji:'🥷', text:`${o.name}의 별 1개를 뺏어왔어요!`, cls:'good'}; });
+  add(1, ()=>{ if(!others.length){ p.stars+=1; return {emoji:'🔃', text:'별 1개를 얻었어요', cls:'good'}; }
+    const leader=state.players.reduce((a,b)=>b.stars>a.stars?b:a);
+    if(leader===p){ p.stars+=1; return {emoji:'👑', text:'이미 1등! 별 +1', cls:'good'}; }
+    const tmp=p.stars; p.stars=leader.stars; leader.stars=tmp;
+    return {emoji:'🔃', text:`1등(${leader.name})과 별을 통째로 맞바꿨어요!`, cls:'good'}; });
+  add(1, ()=>{ p.skip=true; return {emoji:'😴', text:'깜빡! 다음 차례는 한 번 쉬어요', cls:'bad'}; });
+  return pool[Math.floor(Math.random()*pool.length)]();
+}
+function doChance(p){
+  const ev = rollChance(p);
+  document.getElementById('evEmoji').textContent = ev.emoji;
+  const evText=document.getElementById('evText');
+  evText.textContent = ev.text;
+  evText.style.color = ev.cls==='bad' ? '#ff8b8b' : ev.cls==='good' ? '#3ddc84' : '#fff';
+  updatePanel(); // 뒤 점수판 즉시 반영
+  document.getElementById('eventOverlay').classList.add('show');
+  document.getElementById('evNext').onclick=()=>{
+    document.getElementById('eventOverlay').classList.remove('show');
+    if(ev.cls==='good') burst();
+    endTurn(false);
+  };
+}
+
 // ====== 문제 모달 ======
 const overlay=document.getElementById('overlay');
-function openQuestion(unit, reward, bonus){
+// 남은 문제 덱에서 하나 뽑아 소진 (preferUnit 우선, 없으면 남은 단원 중 무작위)
+function drawQuestion(preferUnit){
+  if(preferUnit && preferUnit._deck.length){
+    return { unit:preferUnit, qi:preferUnit._deck.pop() };
+  }
+  const avail = UNITS.filter(u=>u._deck.length);
+  if(!avail.length) return null;             // 모든 문제 소진
+  const u = avail[Math.floor(Math.random()*avail.length)];
+  return { unit:u, qi:u._deck.pop() };
+}
+function openQuestion(preferUnit, reward, bonus){
+  const pick = drawQuestion(preferUnit);
+  if(!pick){ endTurn(false); return; }       // 남은 문제 없음(안전장치)
   state.questionOpen=true;
-  // 최근 낸 문제 피하기
-  const used = state.lastQ[unit.id] || [];
-  let pool = unit.questions.map((q,i)=>i).filter(i=>!used.includes(i));
-  if(pool.length===0){ pool=unit.questions.map((q,i)=>i); state.lastQ[unit.id]=[]; }
-  const qi=pool[Math.floor(Math.random()*pool.length)];
-  (state.lastQ[unit.id]=state.lastQ[unit.id]||[]).push(qi);
-  if(state.lastQ[unit.id].length>6) state.lastQ[unit.id].shift();
-  const Q=unit.questions[qi];
+  state.asked++;
+  const unit = pick.unit, Q = unit.questions[pick.qi];
+  const redirected = preferUnit && preferUnit!==unit; // 해당 단원 소진 → 다른 단원 문제
 
   const badge=document.getElementById('qBadge');
-  badge.textContent=(bonus?'🔑 보너스 · ':'')+unit.ic+' '+unit.name+(reward>1?` (별 ${reward}개)`:'');
+  badge.textContent=(bonus?'🔑 보너스 · ':'')+(redirected?'🔄 ':'')+unit.ic+' '+unit.name+(reward>1?` (별 ${reward}개)`:'');
   badge.style.background=unit.color;
   document.getElementById('qText').textContent=Q.q;
 
@@ -662,7 +724,7 @@ function answer(btn, correct, opts, Q, unit, reward){
 // ====== 턴 종료 ======
 function endTurn(again){
   updatePanel();
-  if(checkWin()) return;
+  if(checkEnd()) return;
   if(again){ state.rolling=false; document.getElementById('rollBtn').disabled=false; return; }
   nextTurn();
 }
@@ -674,17 +736,19 @@ function nextTurn(){
 }
 
 // ====== 승리 ======
-function checkWin(){
-  const winner=state.players.find(p=>p.stars>=state.goal);
-  if(!winner) return false;
+function checkEnd(){
+  const done = state.asked >= state.target || UNITS.every(u=>!u._deck.length);
+  if(!done) return false;
   showWin();
   return true;
 }
 function showWin(){
   const ranked=[...state.players].sort((a,b)=>b.stars-a.stars);
-  document.getElementById('winName').textContent=`${ranked[0].ic} ${ranked[0].name} 우승!`;
+  const top=ranked[0], tie=ranked[1] && ranked[1].stars===top.stars;
+  document.getElementById('winName').textContent = tie ? '공동 1위! 🎉' : `${top.ic} ${top.name} 우승!`;
   const medals=['🥇','🥈','🥉','🏅'];
-  document.getElementById('winRank').innerHTML=ranked.map((p,i)=>
+  const head=`<div class="miniinfo" style="margin-bottom:4px">🏁 ${state.asked}문제를 풀었어요!</div>`;
+  document.getElementById('winRank').innerHTML=head+ranked.map((p,i)=>
     `<div class="scorerow"><span class="dot" style="background:${p.bg}">${p.ic}</span>
       <span class="nm">${medals[i]||''} ${p.name}</span><span class="st">⭐ ${p.stars}</span></div>`).join('');
   document.getElementById('winOverlay').classList.add('show');
