@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>6학년 음악 블루마블 · 1학기 총정리 퀴즈</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Jua&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --c1: #e5484d; /* 장단·민요 */
+    --c2: #f76b15; /* 기보·악기 */
+    --c3: #30a46c; /* 가락·화음 */
+    --c4: #3e7bfa; /* 리듬·창작 */
+    --c5: #8e4ec6; /* 합창·합주 */
+    --c6: #06a5b3; /* 감상·생활 */
+    --gold: #f5c945;
+    --ink: #1f1a2e;
+  }
+
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    min-height: 100vh;
+    color: #fff;
+    background: radial-gradient(ellipse 1100px 700px at 50% 0%, #3a2b63 0%, #241a44 55%, #140d28 100%);
+    padding: 24px 14px 60px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+  }
+
+  .wrap { width: 100%; max-width: 1120px; }
+
+  h1 {
+    font-family: 'Black Han Sans', sans-serif;
+    font-size: clamp(26px, 5vw, 46px);
+    text-align: center;
+    letter-spacing: 1px;
+    line-height: 1.15;
+    background: linear-gradient(90deg, #ffd76b, #ff9a5b, #ff6fb0);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 4px 10px rgba(0,0,0,.35));
+  }
+  .subtitle {
+    text-align: center;
+    font-weight: 500;
+    color: #c7bdec;
+    margin-top: 6px;
+    font-size: clamp(13px, 2.4vw, 16px);
+  }
+
+  /* ============ 설정 화면 ============ */
+  .card {
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 22px;
+    padding: 26px 22px;
+    margin-top: 22px;
+    backdrop-filter: blur(6px);
+    box-shadow: 0 18px 50px rgba(0,0,0,.35);
+  }
+  .setup h2 {
+    font-family: 'Jua', sans-serif;
+    font-size: 20px;
+    margin-bottom: 14px;
+    color: #ffe08a;
+  }
+  .field { margin-bottom: 20px; }
+  .field > label { display:block; font-weight:700; margin-bottom:10px; color:#e6deff; }
+  .chips { display:flex; flex-wrap:wrap; gap:10px; }
+  .chip {
+    border: 2px solid rgba(255,255,255,.2);
+    background: rgba(255,255,255,.05);
+    color:#fff; padding:10px 18px; border-radius:999px;
+    font-size:16px; font-weight:700; cursor:pointer; transition:.15s;
+    font-family:'Jua',sans-serif;
+  }
+  .chip:hover { border-color:#ffd76b; }
+  .chip.on { background:linear-gradient(135deg,#ffd76b,#ff9a5b); color:#3a2450; border-color:transparent; transform:translateY(-2px); }
+
+  .teamnames { display:grid; gap:10px; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); }
+  .teamrow { display:flex; align-items:center; gap:10px; background:rgba(255,255,255,.05); padding:8px 10px; border-radius:14px; }
+  .teamrow .dot { width:26px; height:26px; border-radius:50%; flex:0 0 auto; display:grid; place-items:center; font-size:15px; }
+  .teamrow input {
+    flex:1; min-width:0; background:transparent; border:none; border-bottom:2px solid rgba(255,255,255,.25);
+    color:#fff; font-size:16px; padding:6px 2px; font-family:'Noto Sans KR',sans-serif; font-weight:700;
+  }
+  .teamrow input:focus { outline:none; border-color:#ffd76b; }
+
+  .bigbtn {
+    display:block; width:100%; margin-top:8px; border:none; cursor:pointer;
+    font-family:'Black Han Sans',sans-serif; font-size:22px; letter-spacing:1px;
+    padding:16px; border-radius:16px; color:#3a2450;
+    background:linear-gradient(135deg,#ffe08a,#ff9a5b);
+    box-shadow:0 10px 26px rgba(255,154,91,.4); transition:.15s;
+  }
+  .bigbtn:hover { transform:translateY(-2px); box-shadow:0 14px 32px rgba(255,154,91,.55); }
+
+  .legend { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:8px; margin-top:16px; }
+  .legend .li { display:flex; align-items:center; gap:8px; font-size:13px; color:#dcd4f5; }
+  .legend .sw { width:16px; height:16px; border-radius:5px; flex:0 0 auto; }
+
+  /* ============ 게임 화면 ============ */
+  .game { display:none; margin-top:20px; }
+  .game.show { display:block; }
+
+  .layout { display:grid; grid-template-columns: minmax(0,1.15fr) minmax(280px,.85fr); gap:20px; align-items:start; }
+  @media (max-width: 860px){ .layout { grid-template-columns:1fr; } }
+
+  /* 보드 */
+  .board {
+    aspect-ratio:1/1; width:100%;
+    display:grid; grid-template-columns:repeat(7,1fr); grid-template-rows:repeat(7,1fr);
+    gap:5px; padding:10px; border-radius:20px;
+    background:linear-gradient(135deg,#2c2150,#1c1436);
+    border:1px solid rgba(255,255,255,.1);
+    box-shadow:0 20px 50px rgba(0,0,0,.4);
+  }
+  .tile {
+    position:relative; border-radius:9px; overflow:hidden;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; padding:2px; font-weight:800; color:#fff;
+    background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.08);
+    min-width:0;
+  }
+  .tile .ic { font-size:clamp(13px,2.4vw,22px); line-height:1; }
+  .tile .lb { font-size:clamp(7px,1.4vw,11px); font-weight:700; margin-top:2px; opacity:.95; line-height:1.05; word-break:keep-all; }
+  .tile.cat { box-shadow: inset 0 -4px 0 rgba(0,0,0,.18); }
+  .tile.active { animation:pulse 1s infinite; outline:3px solid #ffd76b; outline-offset:-3px; z-index:3; }
+  @keyframes pulse { 0%,100%{ box-shadow:0 0 0 0 rgba(255,215,107,.6);} 50%{ box-shadow:0 0 14px 4px rgba(255,215,107,.7);} }
+
+  .tile.special { background:linear-gradient(135deg,#3a2f63,#241b45); }
+  .tile.start { background:linear-gradient(135deg,#ffd76b,#ff9a5b); color:#3a2450; }
+
+  .tokens { position:absolute; top:2px; right:2px; display:flex; flex-wrap:wrap; gap:1px; justify-content:flex-end; max-width:70%; }
+  .token { width:15px; height:15px; border-radius:50%; display:grid; place-items:center; font-size:10px; border:2px solid #fff; box-shadow:0 1px 3px rgba(0,0,0,.5); }
+
+  .center {
+    grid-column:2/7; grid-row:2/7;
+    background:radial-gradient(circle at 50% 30%, rgba(255,255,255,.08), rgba(0,0,0,.15));
+    border-radius:14px; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    padding:8px; text-align:center; border:1px dashed rgba(255,255,255,.15);
+  }
+  .center .logo { font-family:'Black Han Sans',sans-serif; font-size:clamp(16px,3.5vw,30px); line-height:1.1;
+    background:linear-gradient(90deg,#ffd76b,#ff6fb0); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+  .center .note { font-size:clamp(9px,1.8vw,13px); color:#c7bdec; margin-top:6px; }
+  .die {
+    margin-top:10px; width:clamp(48px,9vw,74px); height:clamp(48px,9vw,74px); border-radius:16px;
+    background:#fff; color:#241b45; display:grid; place-items:center;
+    font-size:clamp(28px,6vw,46px); box-shadow:0 8px 20px rgba(0,0,0,.4); font-weight:900;
+  }
+  .die.roll { animation:shake .5s; }
+  @keyframes shake { 0%,100%{transform:rotate(0) scale(1);} 25%{transform:rotate(-16deg) scale(1.08);} 75%{transform:rotate(16deg) scale(1.08);} }
+
+  /* 사이드 패널 */
+  .panel { display:flex; flex-direction:column; gap:14px; }
+  .turnbar {
+    border-radius:16px; padding:14px 16px; text-align:center; font-weight:800;
+    background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.12);
+  }
+  .turnbar .who { font-family:'Jua',sans-serif; font-size:22px; }
+  .turnbar .hint { font-size:13px; color:#c7bdec; margin-top:4px; }
+
+  .rollbtn {
+    border:none; cursor:pointer; font-family:'Black Han Sans',sans-serif; font-size:22px; letter-spacing:1px;
+    padding:16px; border-radius:16px; color:#3a2450;
+    background:linear-gradient(135deg,#ffe08a,#ffb15b); box-shadow:0 10px 26px rgba(255,177,91,.4); transition:.12s;
+  }
+  .rollbtn:hover:not(:disabled){ transform:translateY(-2px); }
+  .rollbtn:disabled { opacity:.5; cursor:not-allowed; }
+
+  .scoreboard { display:flex; flex-direction:column; gap:8px; }
+  .scorerow {
+    display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:12px;
+    background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.08); transition:.15s;
+  }
+  .scorerow.cur { border-color:#ffd76b; background:rgba(255,215,107,.12); }
+  .scorerow .dot { width:24px; height:24px; border-radius:50%; display:grid; place-items:center; font-size:14px; flex:0 0 auto; }
+  .scorerow .nm { flex:1; font-weight:700; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .scorerow .st { font-family:'Jua',sans-serif; font-size:17px; color:#ffe08a; white-space:nowrap; }
+
+  .miniinfo { font-size:12px; color:#a99fce; text-align:center; }
+  .textbtn { background:none; border:none; color:#c7bdec; text-decoration:underline; cursor:pointer; font-size:13px; }
+
+  /* ============ 문제 모달 ============ */
+  .overlay {
+    position:fixed; inset:0; z-index:50; display:none; align-items:center; justify-content:center;
+    background:rgba(10,6,22,.72); backdrop-filter:blur(4px); padding:16px;
+  }
+  .overlay.show { display:flex; }
+  .modal {
+    width:100%; max-width:560px; background:linear-gradient(160deg,#2e2456,#1d1540);
+    border:1px solid rgba(255,255,255,.14); border-radius:22px; padding:24px 22px;
+    box-shadow:0 30px 70px rgba(0,0,0,.55); animation:pop .25s ease;
+  }
+  @keyframes pop { from{ transform:scale(.9); opacity:0;} to{ transform:scale(1); opacity:1;} }
+  .modal .badge {
+    display:inline-block; padding:6px 14px; border-radius:999px; font-weight:800; font-size:14px;
+    margin-bottom:14px; font-family:'Jua',sans-serif;
+  }
+  .modal .q { font-size:clamp(17px,3vw,21px); font-weight:800; line-height:1.45; margin-bottom:18px; word-break:keep-all; }
+  .choices { display:flex; flex-direction:column; gap:10px; }
+  .choice {
+    text-align:left; border:2px solid rgba(255,255,255,.16); background:rgba(255,255,255,.05); color:#fff;
+    padding:13px 15px; border-radius:13px; font-size:16px; font-weight:600; cursor:pointer; transition:.12s;
+    display:flex; gap:10px; align-items:flex-start; word-break:keep-all;
+  }
+  .choice:hover:not(:disabled){ border-color:#ffd76b; background:rgba(255,215,107,.1); }
+  .choice:disabled { cursor:default; }
+  .choice .key { font-family:'Jua',sans-serif; color:#ffd76b; flex:0 0 auto; }
+  .choice.correct { border-color:#3ddc84; background:rgba(61,220,132,.18); }
+  .choice.wrong { border-color:#ff6b6b; background:rgba(255,107,107,.16); }
+
+  .explain { margin-top:16px; padding:14px 16px; border-radius:13px; background:rgba(255,255,255,.06);
+    border-left:4px solid #ffd76b; font-size:15px; line-height:1.55; display:none; word-break:keep-all; }
+  .explain.show { display:block; }
+  .explain .res { font-family:'Jua',sans-serif; font-size:18px; margin-bottom:4px; }
+  .nextbtn {
+    display:none; width:100%; margin-top:16px; border:none; cursor:pointer;
+    font-family:'Black Han Sans',sans-serif; font-size:19px; padding:13px; border-radius:14px; color:#3a2450;
+    background:linear-gradient(135deg,#ffe08a,#ffb15b);
+  }
+  .nextbtn.show { display:block; }
+
+  /* 승리 모달 */
+  .win { text-align:center; }
+  .win .trophy { font-size:64px; }
+  .win h2 { font-family:'Black Han Sans',sans-serif; font-size:30px; margin:8px 0; color:#ffe08a; }
+  .win .rank { text-align:left; margin:16px 0; display:flex; flex-direction:column; gap:8px; }
+
+  /* 색종이 */
+  .confetti { position:fixed; top:-12px; width:10px; height:16px; z-index:60; pointer-events:none; border-radius:2px; }
+
+  footer { text-align:center; margin-top:26px; color:#8f85b5; font-size:12px; line-height:1.6; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🎵 6학년 음악 블루마블 🎲</h1>
+  <p class="subtitle">1학기 총정리 · 모둠 대항 퀴즈 보드게임 (동아 · 최미영)</p>
+
+  <!-- ===== 설정 ===== -->
+  <div class="card setup" id="setup">
+    <div class="field">
+      <label>① 몇 모둠이 함께 하나요?</label>
+      <div class="chips" id="teamCount">
+        <button class="chip" data-n="1">혼자 (1)</button>
+        <button class="chip on" data-n="2">2모둠</button>
+        <button class="chip" data-n="3">3모둠</button>
+        <button class="chip" data-n="4">4모둠</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>② 모둠 이름 (그대로 두어도 돼요)</label>
+      <div class="teamnames" id="teamNames"></div>
+    </div>
+
+    <div class="field">
+      <label>③ 몇 개의 별⭐을 먼저 모으면 이길까요?</label>
+      <div class="chips" id="goal">
+        <button class="chip" data-g="6">별 6개 (짧게)</button>
+        <button class="chip on" data-g="10">별 10개 (보통)</button>
+        <button class="chip" data-g="15">별 15개 (길게)</button>
+      </div>
+    </div>
+
+    <button class="bigbtn" id="startBtn">게임 시작하기 ▶</button>
+
+    <div class="legend" id="legend"></div>
+  </div>
+
+  <!-- ===== 게임 ===== -->
+  <div class="game" id="gameView">
+    <div class="layout">
+      <div class="board" id="board"></div>
+      <div class="panel">
+        <div class="turnbar" id="turnbar">
+          <div class="who" id="whoTurn">–</div>
+          <div class="hint" id="turnHint">주사위를 굴려 출발!</div>
+        </div>
+        <button class="rollbtn" id="rollBtn">🎲 주사위 굴리기</button>
+        <div class="scoreboard" id="scoreboard"></div>
+        <div class="miniinfo" id="miniInfo"></div>
+        <div style="text-align:center"><button class="textbtn" id="resetBtn">처음부터 다시</button></div>
+      </div>
+    </div>
+    <footer>
+      각 칸에 도착하면 그 단원의 문제가 나와요. 정답을 맞히면 별⭐ 획득!<br>
+      🔑 황금열쇠 = 보너스 문제(별 2개) · 🎼 지휘자 무대 = 한 번 더 · 🏝️ 쉼표 섬 = 한 번 쉬기 · 🚩 출발 통과 = 별 1개
+    </footer>
+  </div>
+</div>
+
+<!-- 문제 모달 -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <span class="badge" id="qBadge">단원</span>
+    <div class="q" id="qText">문제</div>
+    <div class="choices" id="qChoices"></div>
+    <div class="explain" id="qExplain"></div>
+    <button class="nextbtn" id="qNext">확인하고 계속 ▶</button>
+  </div>
+</div>
+
+<!-- 승리 모달 -->
+<div class="overlay" id="winOverlay">
+  <div class="modal win">
+    <div class="trophy">🏆</div>
+    <h2 id="winName">우승!</h2>
+    <div class="rank" id="winRank"></div>
+    <button class="nextbtn show" id="winAgain" style="display:block">다시 하기 🔁</button>
+  </div>
+</div>
+
+<script>
+// ====== 문제 데이터 (블루마블 6학년 음악 1학기 · 6×12=72문항) ======
+const SUBJECTS = {
+  id: "music6-1",
+  name: "6학년 음악 (1학기)",
+  units: [
+    { id:1, name:"국악 장단과 민요", short:"장단·민요", color:"var(--c1)", ic:"🥁", questions:[
+      { q:"'경복궁타령'에 쓰이는 장단은?", choices:["자진타령장단","굿거리장단","세마치장단","중중모리장단"], answer:0, exp:"경복궁타령은 자진타령장단에 맞추어 부릅니다." },
+      { q:"'경복궁타령'은 어느 지역의 민요일까요?", choices:["경기 지역","남도(전라) 지역","제주 지역","서도(평안) 지역"], answer:0, exp:"경복궁타령은 경기 민요입니다." },
+      { q:"'도움소 소리'에 쓰이는 장단은?", choices:["중중모리장단","자진모리장단","휘모리장단","진양조장단"], answer:0, exp:"도움소 소리는 중중모리장단으로 부릅니다." },
+      { q:"한 사람이 앞부분을 부르면 여러 사람이 뒷부분을 이어 부르는 형식은?", choices:["메기고 받는 형식","돌림노래 형식","파트너 노래 형식","합창 형식"], answer:0, exp:"'도움소 소리'처럼 메기는소리와 받는소리로 주고받는 형식입니다." },
+      { q:"'도움소 소리'의 바탕이 되는 토리는?", choices:["메나리토리","육자배기토리","경토리","수심가토리"], answer:0, exp:"도움소 소리는 메나리토리로 되어 있습니다." },
+      { q:"'너영나영'은 어느 지역의 민요일까요?", choices:["제주 지역","경기 지역","남도(전라) 지역","강원 지역"], answer:0, exp:"너영나영은 제주 민요입니다." },
+      { q:"전라도(남도) 지역 민요의 특징적인 토리는?", choices:["육자배기토리","메나리토리","경토리","수심가토리"], answer:0, exp:"남도 민요는 육자배기토리가 특징입니다." },
+      { q:"육자배기토리의 특징으로 알맞은 것은?", choices:["굵게 떠는 소리와 꺾는 소리","맑고 경쾌한 소리","콧소리를 섞은 소리","빠르고 높은 소리"], answer:0, exp:"육자배기토리는 굵게 떠는 소리와 꺾는 소리가 특징입니다." },
+      { q:"국악에서 가락을 꾸며 주는 표현 방법을 무엇이라고 할까요?", choices:["시김새","토리","장단","한배"], answer:0, exp:"시김새는 가락을 꾸며 자연스럽고 멋있게 만들어 줍니다." },
+      { q:"강원도·경상도 지역 민요에 나타나는 토리는?", choices:["메나리토리","육자배기토리","경토리","제주토리"], answer:0, exp:"동부 지역(강원·경상) 민요는 메나리토리가 특징입니다." },
+      { q:"메기고 받는 형식에서 여러 사람이 함께 부르는 부분은?", choices:["받는소리","메기는소리","후렴소리","이음소리"], answer:0, exp:"한 사람이 메기는소리를, 여러 사람이 받는소리를 부릅니다." },
+      { q:"민요에 대한 설명으로 알맞은 것은?", choices:["백성들 사이에서 자연스럽게 전해 내려온 노래","궁중에서만 부르던 노래","한 사람의 작곡가가 만든 노래","서양에서 들어온 노래"], answer:0, exp:"민요는 지역마다 백성들의 삶 속에서 만들어져 전해 내려온 노래입니다." }
+    ]},
+    { id:2, name:"국악 기보·악기·시조", short:"기보·악기", color:"var(--c2)", ic:"🎋", questions:[
+      { q:"우물 정(井) 자 모양의 칸에 음의 높이와 길이를 기록하는 악보는?", choices:["정간보","오선보","가락선보","구음보"], answer:0, exp:"정간보는 칸(정간)으로 음의 길이를, 율명으로 음의 높이를 나타냅니다." },
+      { q:"정간보를 만든 사람은 누구일까요?", choices:["세종대왕","장영실","박연","우륵"], answer:0, exp:"정간보는 세종대왕이 만든 우리나라의 악보입니다." },
+      { q:"황(黃), 태(太), 중(仲), 임(林), 남(南)처럼 국악에서 음이름을 나타내는 것은?", choices:["율명","계이름","음표","토리"], answer:0, exp:"국악의 음이름을 율명이라고 합니다." },
+      { q:"단소를 연주하는 바른 방법은?", choices:["세로로 잡고 입김을 불어 연주한다","가로로 잡고 입김을 불어 연주한다","채로 두드려 연주한다","줄을 뜯어 연주한다"], answer:0, exp:"단소는 세로로 잡고 부는 관악기입니다." },
+      { q:"정간보에서 한 칸(정간)이 나타내는 것은?", choices:["한 박","한 마디","한 음의 높이","한 장단"], answer:0, exp:"정간 한 칸은 한 박을 나타냅니다." },
+      { q:"시조 '동창이'에서 세 부분을 부르는 이름은?", choices:["초장 - 중장 - 종장","1절 - 2절 - 3절","전주 - 간주 - 후주","A - B - C"], answer:0, exp:"시조는 초장, 중장, 종장의 세 부분으로 이루어집니다." },
+      { q:"'동창이'를 감상할 때 무릎을 손으로 치며 맞추는 장단은?", choices:["무릎장단","어깨장단","손뼉장단","발장단"], answer:0, exp:"무릎장단을 치며 시조의 장단을 느낄 수 있습니다." },
+      { q:"평시조 '동창이'의 특징으로 알맞은 것은?", choices:["가락을 느리게 길게 늘여 부른다","빠르고 신나게 부른다","말하듯이 짧게 부른다","높은 소리로만 부른다"], answer:0, exp:"평시조는 느린 속도로 가락을 길게 늘여 부릅니다." },
+      { q:"가락선 그리기는 무엇을 표현하는 활동일까요?", choices:["가락(음높이)의 움직임","박자의 세기","노랫말의 뜻","악기의 종류"], answer:0, exp:"가락이 올라가고 내려가는 움직임을 선으로 그려 표현합니다." },
+      { q:"창작 국악곡이란 무엇일까요?", choices:["국악의 특징을 살려 새롭게 만든 곡","서양 악기로만 연주하는 곡","옛날부터 전해 내려오는 민요","외국 노래를 번역한 곡"], answer:0, exp:"'아침 해'처럼 국악의 특징을 살려 새로 만든 곡입니다." },
+      { q:"단소와 같이 입김을 불어 소리 내는 악기를 무엇이라고 할까요?", choices:["관악기","현악기","타악기","건반악기"], answer:0, exp:"단소, 리코더처럼 불어서 소리 내는 악기는 관악기입니다." },
+      { q:"정간보를 읽을 때 율명 '황(黃)'은 어떻게 읽을까요?", choices:["황","누를","노랑","합"], answer:0, exp:"율명은 첫 글자만 따서 황, 태, 중, 임, 남으로 읽습니다." }
+    ]},
+    { id:3, name:"가락과 형식 (조성·화음)", short:"가락·화음", color:"var(--c3)", ic:"🎹", questions:[
+      { q:"사장조의 으뜸음은?", choices:["사(솔)","다(도)","바(파)","가(라)"], answer:0, exp:"사장조는 '사(솔)'음이 으뜸음입니다." },
+      { q:"사장조의 조표는?", choices:["올림표(#) 1개","내림표(♭) 1개","올림표(#) 2개","조표 없음"], answer:0, exp:"사장조는 '파'에 올림표가 1개 붙습니다." },
+      { q:"바장조의 조표는?", choices:["내림표(♭) 1개","올림표(#) 1개","내림표(♭) 2개","조표 없음"], answer:0, exp:"바장조는 '시'에 내림표가 1개 붙습니다." },
+      { q:"바장조의 으뜸음은?", choices:["바(파)","사(솔)","다(도)","라"], answer:0, exp:"바장조는 '바(파)'음이 으뜸음입니다." },
+      { q:"가단조의 으뜸음은?", choices:["가(라)","다(도)","사(솔)","마(미)"], answer:0, exp:"가단조는 '가(라)'음이 으뜸음입니다." },
+      { q:"가단조의 조표는 몇 개일까요?", choices:["없다(0개)","올림표 1개","내림표 1개","올림표 2개"], answer:0, exp:"가단조는 조표가 없습니다." },
+      { q:"주요 3화음을 바르게 나타낸 것은?", choices:["으뜸화음, 버금딸림화음, 딸림화음","으뜸화음, 둘째화음, 셋째화음","높은화음, 중간화음, 낮은화음","장화음, 단화음, 반화음"], answer:0, exp:"주요 3화음은 으뜸화음(I), 버금딸림화음(IV), 딸림화음(V)입니다." },
+      { q:"으뜸화음이란 무엇일까요?", choices:["으뜸음 위에 3도씩 쌓아 만든 화음","가장 크게 연주하는 화음","곡의 마지막에만 나오는 화음","가장 높은 음으로 만든 화음"], answer:0, exp:"으뜸음부터 3도 간격으로 음을 쌓아 만든 화음입니다." },
+      { q:"노래가 A부분과 B부분, 두 부분으로 이루어진 형식은?", choices:["AB형식","ABA형식","돌림형식","변주형식"], answer:0, exp:"'마음의 고향'처럼 서로 다른 두 부분으로 이루어진 형식입니다." },
+      { q:"단조로 된 곡의 일반적인 느낌은?", choices:["어둡고 쓸쓸한 느낌","밝고 경쾌한 느낌","시끄럽고 강한 느낌","느낌이 없다"], answer:0, exp:"'툼 발랄라이카' 같은 단조 곡은 어둡고 애잔한 느낌을 줍니다." },
+      { q:"'기차를 타고'를 부를 때 구별하며 불러야 하는 것은?", choices:["같은 가락과 다른 가락","큰 소리와 작은 소리","빠른 부분과 느린 부분","높은 음과 낮은 음"], answer:0, exp:"같은 가락과 다른 가락을 구별하며 노래 부릅니다." },
+      { q:"'툼 발랄라이카'는 어떤 조로 된 곡일까요?", choices:["가단조","사장조","바장조","다장조"], answer:0, exp:"'툼 발랄라이카'는 가단조 곡입니다." }
+    ]},
+    { id:4, name:"리듬과 창작", short:"리듬·창작", color:"var(--c4)", ic:"🎼", questions:[
+      { q:"4/4박자의 뜻으로 알맞은 것은?", choices:["한 마디에 4분음표가 4개","한 마디에 4분음표가 2개","한 곡에 마디가 4개","한 마디에 8분음표가 4개"], answer:0, exp:"4/4박자는 4분음표를 한 박으로 하여 한 마디가 4박입니다." },
+      { q:"4/4박자에서 가장 센 박은 몇 째 박일까요?", choices:["첫째 박","둘째 박","셋째 박","넷째 박"], answer:0, exp:"4/4박자는 '강-약-중강-약'으로 첫째 박이 셉니다." },
+      { q:"온음표는 몇 박일까요?", choices:["4박","2박","1박","3박"], answer:0, exp:"온음표는 4박입니다." },
+      { q:"4분쉼표는 몇 박을 쉴까요?", choices:["1박","2박","반 박","4박"], answer:0, exp:"4분쉼표는 1박을 쉽니다." },
+      { q:"8분음표 2개를 이으면 어떤 음표와 길이가 같을까요?", choices:["4분음표","2분음표","온음표","점4분음표"], answer:0, exp:"8분음표는 반 박이므로 2개면 4분음표(1박)와 같습니다." },
+      { q:"점4분음표의 길이는?", choices:["1박 반","1박","2박","반 박"], answer:0, exp:"점4분음표는 4분음표(1박)에 그 절반(반 박)을 더한 1박 반입니다." },
+      { q:"리듬꼴이란 무엇일까요?", choices:["일정하게 나타나는 리듬의 모양","노래의 빠르기","음의 높낮이","악기의 모양"], answer:0, exp:"곡 속에서 반복되어 나타나는 리듬의 모양을 리듬꼴이라고 합니다." },
+      { q:"노랫말을 바꾸어 부를 때 가장 주의할 점은?", choices:["가락의 리듬(글자 수)에 어울리게 바꾼다","글자 수를 마음대로 늘린다","가락도 함께 바꾼다","제목만 바꾼다"], answer:0, exp:"원래 가락의 리듬에 맞도록 글자 수를 고려해 바꿉니다." },
+      { q:"랩을 만들 때 살리면 좋은 것은?", choices:["라임(운율)","화음","조표","지휘"], answer:0, exp:"끝소리를 맞추는 라임을 살리면 랩이 자연스러워집니다." },
+      { q:"메기는소리의 노랫말을 바꾸어 부르는 활동을 한 제재곡은?", choices:["너영나영","경복궁타령","아침 해","기차를 타고"], answer:0, exp:"'너영나영'에서 메기는소리 노랫말을 바꾸어 불렀습니다." },
+      { q:"리듬을 만들어 악보에 나타낼 때 사용하는 것은?", choices:["음표와 쉼표","글자와 그림","숫자와 기호","색깔과 선"], answer:0, exp:"음표와 쉼표를 사용해 리듬을 기보합니다." },
+      { q:"4마디 리듬꼴을 만들 때 가장 먼저 정해야 할 것은?", choices:["박자","노랫말","제목","악기"], answer:0, exp:"박자를 먼저 정해야 마디에 들어갈 박의 수가 정해집니다." }
+    ]},
+    { id:5, name:"함께하는 음악 (합창·합주)", short:"합창·합주", color:"var(--c5)", ic:"🎤", questions:[
+      { q:"부분 2부 합창이란?", choices:["곡의 일부분을 두 성부로 나누어 부르는 것","두 사람이 번갈아 부르는 것","곡 전체를 혼자 부르는 것","두 곡을 이어 부르는 것"], answer:0, exp:"곡의 일부분에서 두 성부로 나뉘어 부르는 합창입니다." },
+      { q:"합창에서 성부의 어울림을 위해 가장 중요한 것은?", choices:["다른 성부의 소리를 들으며 부르기","내 소리만 크게 부르기","빠르게 부르기","눈을 감고 부르기"], answer:0, exp:"서로의 소리를 들으며 균형을 맞추어야 아름답게 어울립니다." },
+      { q:"파트너 노래란?", choices:["서로 다른 두 노래를 동시에 부르는 것","짝과 마주 보고 부르는 것","같은 노래를 두 번 부르는 것","노래를 이어 부르는 것"], answer:0, exp:"서로 다른 두 노래를 동시에 불러 어울림을 느끼는 활동입니다." },
+      { q:"리코더 2중주란?", choices:["두 성부를 리코더로 함께 연주하는 것","리코더를 두 개 들고 연주하는 것","두 번 반복해서 연주하는 것","리코더와 단소를 함께 연주하는 것"], answer:0, exp:"'학교 가는 길'처럼 두 성부를 나누어 함께 연주합니다." },
+      { q:"리코더 소리를 깨끗하게 내는 방법은?", choices:["'투-' 하고 혀를 사용하는 텅잉","입김을 최대한 세게 분다","구멍을 반만 막는다","리코더를 흔들며 분다"], answer:0, exp:"텅잉으로 소리의 시작을 깨끗하게 만듭니다." },
+      { q:"리코더로 낮은음을 연주할 때 입김의 세기는?", choices:["부드럽고 여리게 분다","아주 세게 분다","숨을 참는다","짧게 끊어 분다"], answer:0, exp:"낮은음은 입김을 여리고 부드럽게 불어야 잘 납니다." },
+      { q:"기악 합주에서 가장 중요한 것은?", choices:["박자를 맞추어 함께 연주하기","혼자 돋보이게 연주하기","가장 빠르게 연주하기","악기를 자주 바꾸기"], answer:0, exp:"서로 박자를 맞추어야 합주가 어우러집니다." },
+      { q:"합창할 때 지휘자를 보는 이유는?", choices:["빠르기와 셈여림을 함께 맞추기 위해","가사를 알려 주기 때문에","점수를 매기기 때문에","노래를 대신 불러 주기 때문에"], answer:0, exp:"지휘를 보며 시작, 빠르기, 셈여림을 함께 맞춥니다." },
+      { q:"\"'넌 할 수 있어'라고 말해 주세요\"에서 노래와 함께 만들어 발표한 것은?", choices:["랩","동시","그림","율동"], answer:0, exp:"노래에 어울리는 랩을 만들어 발표했습니다." },
+      { q:"사장조 주요 3화음 반주에 맞추어 부른 제재곡은?", choices:["함께 노래 불러요","너영나영","경복궁타령","동창이"], answer:0, exp:"'함께 노래 불러요'를 주요 3화음 반주에 맞추어 불렀습니다." },
+      { q:"두 성부가 아름답게 어울릴 때의 느낌으로 알맞은 것은?", choices:["소리가 풍성하고 조화롭다","소리가 시끄럽고 복잡하다","한 성부만 들린다","박자가 흐트러진다"], answer:0, exp:"성부가 어울리면 소리가 풍성하고 조화롭게 들립니다." },
+      { q:"바장조의 주요 3화음 반주를 배운 제재곡은?", choices:["마음의 고향","아침 해","기차를 타고","도움소 소리"], answer:0, exp:"'마음의 고향'에서 바장조 주요 3화음 반주를 익혔습니다." }
+    ]},
+    { id:6, name:"감상과 생활 속 음악", short:"감상·생활", color:"var(--c6)", ic:"🎧", questions:[
+      { q:"모음곡 \"행성\"을 작곡한 사람은?", choices:["홀스트","베토벤","모차르트","비발디"], answer:0, exp:"\"행성\"은 영국 작곡가 구스타브 홀스트의 작품입니다." },
+      { q:"홀스트는 어느 나라의 작곡가일까요?", choices:["영국","독일","이탈리아","미국"], answer:0, exp:"홀스트는 영국의 작곡가입니다." },
+      { q:"\"행성\" 중 '목성'의 부제는?", choices:["즐거움을 가져오는 자","전쟁을 가져오는 자","평화를 가져오는 자","신비를 가져오는 자"], answer:0, exp:"'목성'의 부제는 '즐거움(쾌락)을 가져오는 자'입니다." },
+      { q:"'목성'을 감상할 때 주제 가락에서 파악하며 들은 것은?", choices:["가락, 셈여림, 빠르기 등 음악 요소","작곡가의 얼굴","연주 장소","악보의 두께"], answer:0, exp:"주제 가락의 음악 요소를 파악하며 감상했습니다." },
+      { q:"'목성'의 아름다운 주제 가락은 오늘날 어떻게 쓰이고 있을까요?", choices:["노래나 행사 음악으로 편곡되어 널리 쓰인다","지금은 연주가 금지되었다","악보가 사라져 들을 수 없다","게임에서만 사용된다"], answer:0, exp:"'목성'의 중간 주제는 찬가, 행사 음악 등으로 편곡되어 사랑받고 있습니다." },
+      { q:"저작권이란 무엇일까요?", choices:["창작한 사람이 자신의 작품에 대해 갖는 권리","음악을 크게 들을 수 있는 권리","악기를 살 수 있는 권리","공연장에 들어갈 권리"], answer:0, exp:"음악, 글, 그림 등을 만든 사람이 갖는 권리입니다." },
+      { q:"저작권을 보호하는 바른 실천 방법은?", choices:["정당한 방법(합법 음원)으로 음악 듣기","무료 사이트에서 몰래 내려받기","친구 것을 복사해서 나누기","출처 없이 마음대로 올리기"], answer:0, exp:"합법적인 방법으로 음악을 이용하는 것이 저작권 보호입니다." },
+      { q:"디지털 공간에서 음악을 감상할 때의 바른 태도는?", choices:["바르고 고운 말로 댓글 쓰기","기분 나쁘면 악플 달기","다른 사람 영상 무단 복제하기","아무 말이나 올리기"], answer:0, exp:"디지털 공간에서도 바르게 의사소통해야 합니다." },
+      { q:"생활 속 음악의 예로 알맞지 않은 것은?", choices:["음악은 공연장에서만 들을 수 있다","운동 경기의 응원가","광고에 나오는 음악","영화의 배경 음악"], answer:0, exp:"음악은 공연장뿐 아니라 생활 곳곳에서 쓰입니다." },
+      { q:"영화 속 음악의 중요한 역할은?", choices:["장면의 분위기와 감정을 전달한다","영화를 길게 만든다","배우의 대사를 가린다","화면을 밝게 한다"], answer:0, exp:"영화 음악은 장면의 분위기와 인물의 감정을 살려 줍니다." },
+      { q:"친구에게 음악을 추천할 때 고려할 점으로 알맞은 것은?", choices:["친구의 취향과 상황","노래의 가격","가수의 키","앨범의 두께"], answer:0, exp:"친구가 좋아할 만한 음악을 상황에 맞게 추천합니다." },
+      { q:"창작 국악곡 '아침 해'를 듣고 한 활동으로 알맞은 것은?", choices:["곡의 느낌을 이야기하기","가사를 영어로 번역하기","악기를 분해하기","지휘자 되어 보기"], answer:0, exp:"창작 국악곡을 듣고 느낌을 이야기하며 감상했습니다." }
+    ]}
+  ]
+};
+
+// ====== 유틸 ======
+function shuffle(arr){ const a=arr.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+const UNITS = SUBJECTS.units;
+const TEAM_STYLE = [
+  { ic:"🎹", bg:"#e5484d" },
+  { ic:"🎸", bg:"#3e7bfa" },
+  { ic:"🥁", bg:"#30a46c" },
+  { ic:"🎤", bg:"#f76b15" }
+];
+const DEFAULT_NAMES = ["1모둠","2모둠","3모둠","4모둠"];
+const DIE_FACE = ["","⚀","⚁","⚂","⚃","⚄","⚅"];
+
+// ====== 보드 구성 (24칸) ======
+// 특수칸: 0=출발, 6=황금열쇠, 12=지휘자무대(한번더), 18=쉼표섬(한번쉬기)
+const SPECIAL = {
+  0:  { type:"start",  ic:"🚩", lb:"출발" },
+  6:  { type:"key",    ic:"🔑", lb:"황금열쇠" },
+  12: { type:"again",  ic:"🎼", lb:"지휘자무대" },
+  18: { type:"island", ic:"🏝️", lb:"쉼표 섬" }
+};
+function buildTiles(){
+  const tiles=[]; let catCursor=0;
+  for(let i=0;i<24;i++){
+    if(SPECIAL[i]){ tiles.push({idx:i, ...SPECIAL[i], special:true}); }
+    else {
+      const u = UNITS[catCursor % UNITS.length]; catCursor++;
+      tiles.push({idx:i, type:"cat", unit:u, ic:u.ic, lb:u.short, color:u.color, special:false});
+    }
+  }
+  return tiles;
+}
+function gridPos(i){
+  if(i<=6) return {r:1, c:i+1};
+  if(i<=12) return {r:i-5, c:7};
+  if(i<=18) return {r:7, c:7-(i-12)};
+  return {r:7-(i-18), c:1};
+}
+
+// ====== 상태 ======
+let state = null;
+let TILES = buildTiles();
+
+// ====== 설정 화면 ======
+let selTeams = 2, selGoal = 10;
+const teamCountEl = document.getElementById('teamCount');
+const teamNamesEl = document.getElementById('teamNames');
+const goalEl = document.getElementById('goal');
+
+function renderTeamInputs(){
+  teamNamesEl.innerHTML = '';
+  for(let i=0;i<selTeams;i++){
+    const s = TEAM_STYLE[i];
+    const row = document.createElement('div'); row.className='teamrow';
+    row.innerHTML = `<span class="dot" style="background:${s.bg}">${s.ic}</span>
+      <input type="text" maxlength="10" value="${DEFAULT_NAMES[i]}" data-i="${i}">`;
+    teamNamesEl.appendChild(row);
+  }
+}
+teamCountEl.addEventListener('click', e=>{
+  const b=e.target.closest('.chip'); if(!b) return;
+  [...teamCountEl.children].forEach(c=>c.classList.remove('on')); b.classList.add('on');
+  selTeams = +b.dataset.n; renderTeamInputs();
+});
+goalEl.addEventListener('click', e=>{
+  const b=e.target.closest('.chip'); if(!b) return;
+  [...goalEl.children].forEach(c=>c.classList.remove('on')); b.classList.add('on');
+  selGoal = +b.dataset.g;
+});
+// 범례
+document.getElementById('legend').innerHTML = UNITS.map(u=>
+  `<div class="li"><span class="sw" style="background:${u.color}"></span>${u.ic} ${u.name}</div>`
+).join('');
+renderTeamInputs();
+
+// ====== 게임 시작 ======
+document.getElementById('startBtn').addEventListener('click', ()=>{
+  const inputs=[...teamNamesEl.querySelectorAll('input')];
+  const players = inputs.map((inp,i)=>({
+    name: inp.value.trim() || DEFAULT_NAMES[i],
+    ic: TEAM_STYLE[i].ic, bg: TEAM_STYLE[i].bg,
+    stars:0, pos:0, skip:false
+  }));
+  state = { players, cur:0, goal:selGoal, rolling:false, questionOpen:false, lastQ:{} };
+  document.getElementById('setup').style.display='none';
+  document.getElementById('gameView').classList.add('show');
+  renderBoard();
+  updatePanel();
+  window.scrollTo({top:0, behavior:'smooth'});
+});
+
+// ====== 보드 렌더 ======
+function renderBoard(){
+  const board = document.getElementById('board');
+  board.innerHTML='';
+  TILES.forEach(t=>{
+    const el=document.createElement('div');
+    const {r,c}=gridPos(t.idx);
+    el.style.gridRow=r; el.style.gridColumn=c;
+    el.dataset.idx=t.idx;
+    el.className='tile '+(t.type==='cat'?'cat':'special')+(t.type==='start'?' start':'');
+    if(t.type==='cat') el.style.background=t.color;
+    el.innerHTML=`<span class="ic">${t.ic}</span><span class="lb">${t.lb}</span><span class="tokens"></span>`;
+    board.appendChild(el);
+  });
+  // 중앙
+  const center=document.createElement('div');
+  center.className='center';
+  center.innerHTML=`<div class="logo">음악<br>블루마블</div>
+    <div class="note">주사위를 굴려<br>판을 돌아요!</div>
+    <div class="die" id="die">🎲</div>`;
+  board.appendChild(center);
+  renderTokens();
+}
+function renderTokens(){
+  document.querySelectorAll('.tokens').forEach(t=>t.innerHTML='');
+  state.players.forEach(p=>{
+    const tile=document.querySelector(`.tile[data-idx="${p.pos}"] .tokens`);
+    if(tile){
+      const tk=document.createElement('span');
+      tk.className='token'; tk.style.background=p.bg; tk.textContent=p.ic;
+      tile.appendChild(tk);
+    }
+  });
+}
+
+// ====== 패널 ======
+function updatePanel(){
+  const p=state.players[state.cur];
+  document.getElementById('whoTurn').innerHTML=`${p.ic} ${p.name} 차례`;
+  document.getElementById('turnHint').textContent = p.skip ? '이번엔 쉼표 섬에서 한 번 쉬어요!' : '주사위를 굴려 보세요';
+  document.getElementById('miniInfo').textContent = `목표: 별 ${state.goal}개 먼저 모으기`;
+  // 점수판
+  const sb=document.getElementById('scoreboard');
+  sb.innerHTML=state.players.map((pl,i)=>
+    `<div class="scorerow ${i===state.cur?'cur':''}">
+      <span class="dot" style="background:${pl.bg}">${pl.ic}</span>
+      <span class="nm">${pl.name}</span>
+      <span class="st">⭐ ${pl.stars}</span>
+    </div>`).join('');
+  const rb=document.getElementById('rollBtn');
+  rb.disabled=false;
+  rb.textContent = p.skip ? '⏭️ 한 번 쉬기 (넘어가기)' : '🎲 주사위 굴리기';
+}
+
+// ====== 주사위 & 이동 ======
+document.getElementById('rollBtn').addEventListener('click', ()=>{
+  if(state.rolling || state.questionOpen) return;
+  const p=state.players[state.cur];
+  if(p.skip){ p.skip=false; nextTurn(); return; }
+  state.rolling=true;
+  const rb=document.getElementById('rollBtn'); rb.disabled=true;
+  const die=document.getElementById('die'); die.classList.add('roll');
+  let ticks=0;
+  const spin=setInterval(()=>{ die.textContent=DIE_FACE[1+Math.floor(Math.random()*6)]; ticks++;
+    if(ticks>8){ clearInterval(spin); finishRoll(); }
+  },70);
+  function finishRoll(){
+    const roll=1+Math.floor(Math.random()*6);
+    die.textContent=DIE_FACE[roll];
+    setTimeout(()=>die.classList.remove('roll'),200);
+    document.getElementById('turnHint').textContent=`🎲 ${roll} 나왔어요! 이동합니다`;
+    moveToken(p, roll);
+  }
+});
+
+function moveToken(p, roll){
+  let steps=roll;
+  const step=()=>{
+    p.pos=(p.pos+1)%24;
+    if(p.pos===0){ p.stars++; flash('🚩 출발 통과! 별 +1'); }
+    renderTokens();
+    highlight(p.pos);
+    steps--;
+    if(steps>0){ setTimeout(step, 230); }
+    else { setTimeout(()=>{ landOn(p); }, 320); }
+  };
+  step();
+}
+function highlight(idx){
+  document.querySelectorAll('.tile.active').forEach(e=>e.classList.remove('active'));
+  const el=document.querySelector(`.tile[data-idx="${idx}"]`);
+  if(el) el.classList.add('active');
+}
+
+// ====== 칸 도착 처리 ======
+function landOn(p){
+  const t=TILES[p.pos];
+  if(t.type==='cat'){ openQuestion(t.unit, 1); }
+  else if(t.type==='key'){ const u=UNITS[Math.floor(Math.random()*UNITS.length)]; flash('🔑 황금열쇠! 보너스 문제 (별 2개)'); setTimeout(()=>openQuestion(u,2,true),700); }
+  else if(t.type==='again'){ flash('🎼 지휘자 무대! 한 번 더 굴려요'); endTurn(true); }
+  else if(t.type==='island'){ p.skip=true; flash('🏝️ 쉼표 섬! 다음 차례는 쉬어요'); endTurn(false); }
+  else if(t.type==='start'){ p.stars++; flash('🚩 출발 도착! 별 +1'); endTurn(false); }
+}
+
+// ====== 문제 모달 ======
+const overlay=document.getElementById('overlay');
+function openQuestion(unit, reward, bonus){
+  state.questionOpen=true;
+  // 최근 낸 문제 피하기
+  const used = state.lastQ[unit.id] || [];
+  let pool = unit.questions.map((q,i)=>i).filter(i=>!used.includes(i));
+  if(pool.length===0){ pool=unit.questions.map((q,i)=>i); state.lastQ[unit.id]=[]; }
+  const qi=pool[Math.floor(Math.random()*pool.length)];
+  (state.lastQ[unit.id]=state.lastQ[unit.id]||[]).push(qi);
+  if(state.lastQ[unit.id].length>6) state.lastQ[unit.id].shift();
+  const Q=unit.questions[qi];
+
+  const badge=document.getElementById('qBadge');
+  badge.textContent=(bonus?'🔑 보너스 · ':'')+unit.ic+' '+unit.name+(reward>1?` (별 ${reward}개)`:'');
+  badge.style.background=unit.color;
+  document.getElementById('qText').textContent=Q.q;
+
+  // 보기 셔플 (원본 answer는 항상 0 → 반드시 섞기)
+  const opts=shuffle(Q.choices.map((c,i)=>({text:c, correct:i===Q.answer})));
+  const KEYS=['㉮','㉯','㉰','㉱'];
+  const box=document.getElementById('qChoices'); box.innerHTML='';
+  opts.forEach((o,i)=>{
+    const b=document.createElement('button');
+    b.className='choice';
+    b.innerHTML=`<span class="key">${KEYS[i]}</span><span>${o.text}</span>`;
+    b.addEventListener('click', ()=>answer(b, o.correct, opts, Q, unit, reward));
+    box.appendChild(b);
+  });
+  const ex=document.getElementById('qExplain'); ex.className='explain'; ex.innerHTML='';
+  const nx=document.getElementById('qNext'); nx.className='nextbtn';
+  overlay.classList.add('show');
+}
+function answer(btn, correct, opts, Q, unit, reward){
+  const buttons=[...document.querySelectorAll('#qChoices .choice')];
+  buttons.forEach((b,i)=>{ b.disabled=true; if(opts[i].correct) b.classList.add('correct'); });
+  const p=state.players[state.cur];
+  const ex=document.getElementById('qExplain');
+  if(correct){
+    p.stars+=reward;
+    ex.innerHTML=`<div class="res" style="color:#3ddc84">⭕ 정답! ⭐ +${reward}</div>${Q.exp}`;
+  } else {
+    btn.classList.add('wrong');
+    ex.innerHTML=`<div class="res" style="color:#ff8b8b">❌ 아쉬워요</div>${Q.exp}`;
+  }
+  ex.classList.add('show');
+  const nx=document.getElementById('qNext'); nx.classList.add('show');
+  nx.onclick=()=>{
+    overlay.classList.remove('show');
+    state.questionOpen=false;
+    if(correct) burst();
+    endTurn(false);
+  };
+}
+
+// ====== 턴 종료 ======
+function endTurn(again){
+  updatePanel();
+  if(checkWin()) return;
+  if(again){ state.rolling=false; document.getElementById('rollBtn').disabled=false; return; }
+  nextTurn();
+}
+function nextTurn(){
+  document.querySelectorAll('.tile.active').forEach(e=>e.classList.remove('active'));
+  state.cur=(state.cur+1)%state.players.length;
+  state.rolling=false;
+  updatePanel();
+}
+
+// ====== 승리 ======
+function checkWin(){
+  const winner=state.players.find(p=>p.stars>=state.goal);
+  if(!winner) return false;
+  showWin();
+  return true;
+}
+function showWin(){
+  const ranked=[...state.players].sort((a,b)=>b.stars-a.stars);
+  document.getElementById('winName').textContent=`${ranked[0].ic} ${ranked[0].name} 우승!`;
+  const medals=['🥇','🥈','🥉','🏅'];
+  document.getElementById('winRank').innerHTML=ranked.map((p,i)=>
+    `<div class="scorerow"><span class="dot" style="background:${p.bg}">${p.ic}</span>
+      <span class="nm">${medals[i]||''} ${p.name}</span><span class="st">⭐ ${p.stars}</span></div>`).join('');
+  document.getElementById('winOverlay').classList.add('show');
+  bigBurst();
+}
+document.getElementById('winAgain').addEventListener('click', ()=>location.reload());
+document.getElementById('resetBtn').addEventListener('click', ()=>{ if(confirm('처음 설정 화면으로 돌아갈까요?')) location.reload(); });
+
+// ====== 알림/색종이 ======
+let flashTimer=null;
+function flash(msg){
+  document.getElementById('turnHint').textContent=msg;
+}
+function burst(){ spawnConfetti(24); }
+function bigBurst(){ spawnConfetti(90); }
+function spawnConfetti(n){
+  const colors=['#ffd76b','#ff6fb0','#3ddc84','#3e7bfa','#ff9a5b','#8e4ec6'];
+  for(let i=0;i<n;i++){
+    const c=document.createElement('div'); c.className='confetti';
+    c.style.left=Math.random()*100+'vw';
+    c.style.background=colors[Math.floor(Math.random()*colors.length)];
+    c.style.transform=`rotate(${Math.random()*360}deg)`;
+    document.body.appendChild(c);
+    const dur=1400+Math.random()*1200;
+    c.animate([
+      {transform:`translateY(0) rotate(0)`, opacity:1},
+      {transform:`translateY(${window.innerHeight+40}px) rotate(${540+Math.random()*360}deg)`, opacity:.9}
+    ], {duration:dur, easing:'cubic-bezier(.3,.6,.5,1)'});
+    setTimeout(()=>c.remove(), dur);
+  }
+}
+</script>
+</body>
+</html>
